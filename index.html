@@ -56,6 +56,16 @@
           <div class="column has-text-centered" style="padding-top:1.1rem; padding-bottom:0.2rem;">
             <div class="publication-links">
               <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-dark" aria-disabled="true">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (Coming Soon)</span>
+                </span>
+              </span>
+              <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-dark" aria-disabled="true">
+                  <span class="icon"><i class="fas fa-book-open"></i></span><span>arXiv (Coming Soon)</span>
+                </span>
+              </span>
+              <span class="link-block">
                 <a href="#" class="external-link button is-normal is-rounded is-dark" disabled title="Code release coming soon">
                   <span class="icon"><i class="fab fa-github"></i></span><span>Code (Coming Soon)</span>
                 </a>
@@ -214,7 +224,7 @@
       <p>
         We use an LLM-based workspace generator to create motion planning environments and cuRobo
         to generate expert trajectories. The training dataset contains approximately
-        <strong>3.5 million trajectories</strong> from <strong>~500 generated workspaces</strong>.
+        <strong>3.5 million trajectories</strong> from <strong>~1000 generated workspaces</strong>.
         The same dataset and training setup is used for Flow Motion Policy, all neural baselines,
         and all ablation models to ensure fair comparison. All experiments run on an
         NVIDIA RTX 4080 GPU.
@@ -231,7 +241,7 @@
 
     <div class="content" style="font-size:0.95rem; line-height:1.72; color:#333;">
       <p>
-        We compare Flow Motion Policy against nine baselines across six manipulation environments:
+        We compare Flow Motion Policy against eight baselines across six manipulation environments:
         <em>sampling-based</em> — RRT-Connect (RRTC), BIT*;
         <em>optimization-based</em> — cuRobo, cuRobo-Vox;
         <em>neural informed samplers</em> — MPNets, SIMPNet, GAIDE;
@@ -284,42 +294,39 @@
     <!-- Path Diversity -->
     <div class="sec-panel sec-panel-hidden" id="panel-diversity">
       <p class="sec-panel-desc">
-        For a fixed start-goal-scene query, Flow Motion Policy generates diverse trajectory proposals —
-        not copies of a single dominant path. Diversity is measured as the average pairwise joint-space
-        trajectory distance across sampled candidates. The spread is meaningful and consistent: it
-        persists even within the collision-free subset, indicating the model has learned a genuine
-        distribution over feasible motions rather than collapsing to a single mode.
+        For a fixed start-goal-scene query, Flow Motion Policy generates diverse proposals in joint and
+        end-effector space. In the reported sample of 100 paths, all reached the goal and 45 were
+        collision-free. Diversity is measured as the mean pairwise per-waypoint distance across the
+        sampled paths.
       </p>
 
-      <!-- Paper Table IV: fixed-query summary -->
+      <!-- Paper Table VI: fixed-query summary -->
       <h3 class="subsec-heading" style="margin-top:0;">Fixed-Query Diversity (N = 100)</h3>
       <div class="tbl-scroll">
         <table class="bt">
           <thead>
             <tr>
-              <th>Samples per query</th>
+              <th>Paths per query (N)</th>
+              <th>Joint diversity</th>
+              <th>End-effector diversity</th>
+              <th>Goal-reaching</th>
               <th>Collision-free</th>
-              <th>Pairwise diversity (all)</th>
-              <th>Pairwise diversity (collision-free)</th>
-              <th>FMP-1 success</th>
-              <th>FMP-100 success</th>
             </tr>
           </thead>
           <tbody>
             <tr class="ours">
-              <td>300</td>
-              <td><span class="bv">300 / 300</span></td>
-              <td>0.26 rad</td>
-              <td>0.26 rad</td>
-              <td>43.5%</td>
-              <td><span class="bv">62.3%</span></td>
+              <td>100</td>
+              <td>0.092 &plusmn; 0.024 rad</td>
+              <td>0.041 &plusmn; 0.012 m</td>
+              <td>100 / 100</td>
+              <td><span class="bv">45 / 100</span></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="tbl-cap">
-        All 300 sampled trajectories reach the goal and are collision-free for this query, with
-        consistent pairwise diversity across the full and feasible subsets.
+        For this fixed query, all 100 sampled paths reach the goal and 45 are collision-free. Diversity
+        is the mean pairwise per-waypoint distance across sampled paths.
       </p>
 
 
@@ -351,10 +358,10 @@
       <p class="sec-panel-desc">
         We ablate the policy head design by testing four flow architectures (MLP, U-Net, Transformer,
         DiT) and comparing each against a diffusion-based counterpart (DMP) with the same encoder
-        backbone. FMP consistently outperforms DMP across architectures and N values, reaching
-        higher success with fewer inference function evaluations. The MLP head delivers the best
-        speed-accuracy trade-off; heavier architectures add marginal accuracy at the cost of higher
-        latency. Use the tabs below to compare N=1 vs N=100, and success rate vs. planning time.
+        backbone. The results show a success-time trade-off: flow matching reaches higher success
+        with fewer inference steps overall, while more complex heads can improve success on some tasks
+        at additional latency. The MLP head has the fastest planning time. Use the tabs below to compare
+        N=1 vs N=100, and success rate vs. planning time.
       </p>
       <div class="fmp-bar-chart" data-chart="head"></div>
     </div>
@@ -375,11 +382,11 @@
     <!-- Best-of-N Scaling -->
     <div class="sec-panel sec-panel-hidden" id="panel-bon">
       <p class="sec-panel-desc">
-        Increasing N monotonically improves success rate for both FMP and DMP across all head
-        architectures. FMP scales more efficiently — reaching comparable or higher success than DMP
-        at the same N, while generating candidates faster. Toggle between FMP and DMP, and between
-        Success Rate and Planning Time, to compare the full picture. Hover over the chart to read
-        exact values at each N.
+        Increasing N generally improves success rate for both FMP and DMP, while also increasing
+        planning time because more candidate trajectories must be generated and evaluated. The
+        success-time trade-off depends on policy-head complexity: larger heads can improve success
+        on some tasks, but each candidate takes longer to generate. Toggle between FMP and DMP, and
+        between Success Rate and Planning Time, to compare the results. Hover for exact values.
       </p>
       <div class="fmp-line-chart" id="lc-bon" data-linechart="bon"></div>
     </div>
