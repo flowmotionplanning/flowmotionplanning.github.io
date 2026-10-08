@@ -1,0 +1,255 @@
+:root {
+  --research-accent: #2d6cdf;
+  --research-ink: #172033;
+  --research-muted: #657184;
+  --research-line: rgba(101, 113, 132, 0.18);
+  --research-card: rgba(255, 255, 255, 0.84);
+  --research-shadow: 0 18px 45px rgba(24, 35, 56, 0.10);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.research-polished {
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--research-accent) 8%, transparent), transparent 28rem),
+    radial-gradient(circle at 88% 18%, rgba(39, 116, 191, 0.07), transparent 30rem),
+    #fff;
+}
+
+.research-progress {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--research-accent), #2f80ed);
+  transform: scaleX(0);
+  transform-origin: left center;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--research-accent) 45%, transparent);
+}
+
+.research-contents {
+  position: fixed;
+  z-index: 90;
+  left: max(1rem, calc(50vw - 690px));
+  top: 6.1rem;
+  width: 178px;
+  padding: 0.75rem;
+  border: 1px solid var(--research-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 30px rgba(24, 35, 56, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.research-contents-title {
+  padding: 0.2rem 0.45rem 0.55rem;
+  font-family: "Google Sans", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--research-muted);
+}
+
+.research-contents-link {
+  display: block;
+  width: 100%;
+  margin: 0.08rem 0;
+  padding: 0.42rem 0.55rem;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #3a4352;
+  cursor: pointer;
+  font: 700 0.82rem/1.25 "Google Sans", sans-serif;
+  text-align: left;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.research-contents-link:hover,
+.research-contents-link.active {
+  color: var(--research-accent);
+  background: color-mix(in srgb, var(--research-accent) 10%, transparent);
+  border-left-color: var(--research-accent);
+  transform: translateX(2px);
+}
+
+.research-polished .section {
+  position: relative;
+}
+
+.research-polished .sec-heading {
+  position: relative;
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.research-polished .sec-heading::after {
+  content: "";
+  display: block;
+  width: 54px;
+  height: 3px;
+  margin: 0.55rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--research-accent), transparent);
+}
+
+.research-polished .hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.research-polished .hero::before {
+  content: "";
+  position: absolute;
+  inset: auto -14vw -18rem -14vw;
+  height: 26rem;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--research-accent) 9%, transparent), transparent 65%);
+}
+
+.research-polished .publication-video-block,
+.research-polished .survey-hero-card,
+.research-polished .fig-wrap,
+.research-polished .chart-card,
+.research-polished .fmp-chart-wrap,
+.research-polished .realworld-chart-card,
+.research-polished .method-visual-card,
+.research-polished .taxonomy-card,
+.research-polished .module-card,
+.research-polished .paper-browser,
+.research-polished .highlight-shell,
+.research-polished .fmp-highlight-shell {
+  border-color: color-mix(in srgb, var(--research-accent) 17%, #dfe5ee);
+  box-shadow: var(--research-shadow);
+}
+
+.research-polished .highlight-card,
+.research-polished .method-step,
+.research-polished .mini-figure {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.research-polished .highlight-card:hover,
+.research-polished .method-step:hover,
+.research-polished .mini-figure:hover,
+.research-polished .chart-card:hover,
+.research-polished .fmp-chart-wrap:hover,
+.research-polished .fig-wrap:hover,
+.research-polished .module-card:hover,
+.research-polished .taxonomy-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--research-accent) 32%, #dfe5ee);
+  box-shadow: 0 22px 52px rgba(24, 35, 56, 0.14);
+}
+
+.research-polished .highlight-icon {
+  filter: drop-shadow(0 7px 12px color-mix(in srgb, var(--research-accent) 16%, transparent));
+}
+
+.research-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.research-reveal.research-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.research-clickable-media {
+  cursor: zoom-in;
+}
+
+.research-lightbox {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: rgba(10, 14, 22, 0.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.research-lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.research-lightbox img {
+  max-width: min(1100px, 94vw);
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.4);
+  background: #fff;
+}
+
+.research-lightbox-close,
+.research-top {
+  border: 0;
+  cursor: pointer;
+  font-family: "Google Sans", sans-serif;
+  box-shadow: 0 12px 28px rgba(24, 35, 56, 0.18);
+}
+
+.research-lightbox-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--research-ink);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.research-top {
+  position: fixed;
+  z-index: 950;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--research-accent);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.research-top.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+@media (max-width: 1180px) {
+  .research-contents {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .research-lightbox {
+    padding: 1rem;
+  }
+  .research-top {
+    right: 0.8rem;
+    bottom: 0.8rem;
+  }
+}

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Flow Motion Policy: Manipulator Motion Planning with Flow Matching Models. End-to-end neural motion planner using flow matching for best-of-N trajectory sampling.">
+  <meta name="keywords" content="Flow Motion Policy, FMP, flow matching, motion planning, robotics, manipulation, neural planning, point cloud, best-of-N">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flow Motion Policy: Manipulator Motion Planning with Flow Matching Models</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/site-polish.css?v=20260703">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="./static/js/charts.js"></script>
+  <script defer src="./static/js/site-polish.js?v=20260703"></script>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow:1; justify-content:center;">
+      <a class="navbar-item" href="#"><span class="icon"><i class="fas fa-home"></i></span></a>
+      <a class="navbar-item" href="#abstract">Abstract</a>
+      <a class="navbar-item" href="#method">Method</a>
+      <a class="navbar-item" href="#results">Results</a>
+      <a class="navbar-item" href="#ablation">Ablations</a>
+      <a class="navbar-item" href="#realworld">Real-World</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero sec-white">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h1 class="title publication-title">
+            Flow Motion Policy: Manipulator Motion Planning<br>with Flow Matching Models
+          </h1>
+
+          <div class="is-size-5 publication-authors" style="margin-top:0.8rem;">Anonymous submission</div>
+
+          <div class="column has-text-centered" style="padding-top:1.1rem; padding-bottom:0.2rem;">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark" disabled title="Code release coming soon">
+                  <span class="icon"><i class="fab fa-github"></i></span><span>Code (Coming Soon)</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark" disabled title="Dataset release coming soon">
+                  <span class="icon"><img src="./static/images/hf_icon.svg" alt="HF"></span>
+                  <span>Dataset (Coming Soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+
+          <div class="publication-video-block">
+            <video controls muted loop playsinline>
+              <source src="./static/images/FMP.mp4" type="video/mp4">
+            </video>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== OPENING FIGURE ===================== -->
+<section class="section sec-gray" style="padding-top:2rem; padding-bottom:2rem;">
+  <div class="container is-max-desktop">
+    <div class="fig-wrap fig-full">
+      <img src="./static/images/01OpeningImage.png"
+           alt="Flow Motion Policy overview: point cloud conditioned flow policy with best-of-N sampling">
+      <p class="fig-cap">
+        <strong>Method Overview.</strong>
+        Flow Motion Policy is a point cloud–conditioned flow-based motion policy that enables best-of-<em>N</em>
+        sampling for motion planning in complex environments. The framework leverages the generative formulation
+        of flow matching to capture the inherent distribution of motion planning datasets and supports efficient
+        inference-time best-of-<em>N</em> sampling. Compared to neural informed samplers (MPNets) and
+        end-to-end deterministic planners (PerFACT), Flow Motion Policy achieves higher planning efficiency.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== ABSTRACT ===================== -->
+<section class="section sec-white" id="abstract">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="sec-heading">Abstract</h2>
+        <div class="content has-text-justified" style="font-size:0.97rem; line-height:1.75; color:#333;">
+          <p>
+            Open-loop end-to-end neural motion planners have recently been proposed to improve motion planning
+            for robotic manipulators. These methods enable planning directly from sensor observations without
+            relying on a privileged collision checker during motion planning. However, existing planners produce
+            a single path for a given planning problem and cannot exploit their open-loop nature to propose
+            multiple motion plans. To address this limitation, we introduce <strong>Flow Motion Policy</strong>,
+            an open-loop neural motion planner that uses flow matching to generate a batch of motion plan
+            proposals by learning a distribution over motion plans conditioned on the planning observation.
+            At inference time, it samples multiple candidate motion plans to enable efficient best-of-<em>N</em>
+            inference while avoiding iterative collision checking during planning. We benchmark Flow Motion Policy
+            against representative sampling-based, optimization-based and neural motion planning methods.
+            Evaluation results demonstrate that Flow Motion Policy improves planning success and efficiency,
+            highlighting the effectiveness of stochastic generative policies for end-to-end motion planning
+            and best-of-<em>N</em> sampling.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Highlights -->
+    <div class="fmp-highlight-shell reveal-block">
+      <div class="highlight-kicker">Highlights</div>
+      <h3>Learn many motion proposals first, validate them once.</h3>
+      <p class="highlight-lead">
+        Flow Motion Policy amortizes planning into a stochastic trajectory generator: it proposes complete
+        joint-space paths from point-cloud observations, then uses batched validation to select a feasible one.
+      </p>
+
+      <div class="highlight-grid">
+        <div class="highlight-card primary">
+          <span class="highlight-icon"><i class="fas fa-bolt"></i></span>
+          <strong>0.16s</strong>
+          <p>single-sample planning time for FMP-1, the fastest setting in our benchmark.</p>
+        </div>
+        <div class="highlight-card">
+          <span class="highlight-icon"><i class="fas fa-layer-group"></i></span>
+          <strong>Best-of-<em>N</em></strong>
+          <p>sample many candidate paths at inference without retraining the policy.</p>
+        </div>
+        <div class="highlight-card">
+          <span class="highlight-icon"><i class="fas fa-cloud"></i></span>
+          <strong>Point clouds</strong>
+          <p>condition on robot and workspace geometry directly from scene observations.</p>
+        </div>
+        <div class="highlight-card">
+          <span class="highlight-icon"><i class="fas fa-robot"></i></span>
+          <strong>86.7%</strong>
+          <p>real-world success with FMP-100 across 30 physical manipulation tasks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== METHOD ===================== -->
+<section class="section sec-gray" id="method">
+  <div class="container is-max-desktop">
+    <h2 class="sec-heading">Method</h2>
+
+    <div class="method-story reveal-block">
+      <div class="method-copy">
+        <div class="highlight-kicker">Method</div>
+        <h3>Flow matching turns planning into conditional trajectory sampling.</h3>
+        <p>
+          Given the current configuration, goal configuration, robot point cloud, and workspace point cloud,
+          FMP learns a distribution over joint-space action chunks rather than predicting a single path.
+        </p>
+        <div class="formula-pill">
+          p<sub>&theta;</sub>(&delta;q<sub>t:t+H&minus;1</sub> | q<sub>t</sub>, q<sub>goal</sub>, P)
+        </div>
+      </div>
+      <div class="method-steps">
+        <div class="method-step">
+          <span>1</span>
+          <h4>Encode Planning Context</h4>
+          <p>Embed current/goal configurations and robot/workspace point clouds into shared planning tokens.</p>
+        </div>
+        <div class="method-step">
+          <span>2</span>
+          <h4>Generate Candidate Paths</h4>
+          <p>Use a flow head to transform Gaussian noise into autoregressive joint-space action chunks.</p>
+        </div>
+        <div class="method-step">
+          <span>3</span>
+          <h4>Select a Feasible Plan</h4>
+          <p>Validate sampled trajectories in batch and choose a collision-free candidate for execution.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="method-visual-card reveal-block">
+      <img src="./static/images/02FMP.png"
+           alt="Flow Motion Policy architecture: encoder + flow MLP + best-of-N sampling">
+      <p>
+        <strong>Flow Motion Policy Architecture.</strong>
+        A transformer encoder fuses configuration and point-cloud tokens, then conditions a flow MLP that
+        denoises Gaussian samples into joint-space action chunks for best-of-<em>N</em> planning.
+      </p>
+    </div>
+
+    <h3 class="subsec-heading">Training Setup</h3>
+    <div class="content" style="font-size:0.95rem; line-height:1.72; color:#333;">
+      <p>
+        We use an LLM-based workspace generator to create motion planning environments and cuRobo
+        to generate expert trajectories. The training dataset contains approximately
+        <strong>3.5 million trajectories</strong> from <strong>~500 generated workspaces</strong>.
+        The same dataset and training setup is used for Flow Motion Policy, all neural baselines,
+        and all ablation models to ensure fair comparison. All experiments run on an
+        NVIDIA RTX 4080 GPU.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== RESULTS ===================== -->
+<section class="section sec-white" id="results">
+  <div class="container is-max-desktop">
+    <h2 class="sec-heading">Results</h2>
+
+    <div class="content" style="font-size:0.95rem; line-height:1.72; color:#333;">
+      <p>
+        We compare Flow Motion Policy against nine baselines across six manipulation environments:
+        <em>sampling-based</em> — RRT-Connect (RRTC), BIT*;
+        <em>optimization-based</em> — cuRobo, cuRobo-Vox;
+        <em>neural informed samplers</em> — MPNets, SIMPNet, GAIDE;
+        and <em>end-to-end neural planners</em> — PerFACT.
+        <strong>FMP-1</strong> uses a single candidate (N=1); <strong>FMP-100</strong> uses best-of-100.
+        Five metrics are reported: planning time T&nbsp;[s], success rate SR&nbsp;[%],
+        path length C&nbsp;[rad], smoothness S, and jerk J.
+      </p>
+    </div>
+
+    <!-- Animated bar chart -->
+    <h3 class="subsec-heading">Comparison with Benchmark Planners</h3>
+    <div class="reveal-block">
+      <div class="fmp-bar-chart" data-metric="sr"></div>
+    </div>
+
+
+  </div>
+</section>
+
+
+<!-- ===================== ABLATIONS & COMPARISONS ===================== -->
+<section class="section sec-gray" id="ablation">
+  <div class="container is-max-desktop">
+    <h2 class="sec-heading">Ablations &amp; Comparisons</h2>
+
+    <!-- Section-level tab nav -->
+    <div class="sec-tab-nav" role="tablist">
+      <button class="sec-tab active" data-panel="panel-gmm">GMM Comparison</button>
+      <button class="sec-tab" data-panel="panel-diversity">Path Diversity</button>
+      <button class="sec-tab" data-panel="panel-tts">Time-to-Solution</button>
+      <button class="sec-tab" data-panel="panel-head">Policy Head</button>
+      <button class="sec-tab" data-panel="panel-nfe">NFE</button>
+      <button class="sec-tab" data-panel="panel-bon">Best-of-N Scaling</button>
+      <button class="sec-tab" data-panel="panel-steps">Inference Steps</button>
+    </div>
+
+    <!-- GMM Comparison -->
+    <div class="sec-panel" id="panel-gmm">
+      <p class="sec-panel-desc">
+        We compare Flow Motion Policy against an adapted Neural MP baseline that uses a Gaussian Mixture
+        Model (GMM) head for inference-time best-of-N sampling. Flow Motion Policy consistently
+        outperforms the GMM-based policy across all tasks. This is due to its flow matching formulation,
+        which captures more complex path distributions than a fixed-component GMM, and to its substantially
+        lighter architecture — enabling faster inference and more diverse candidate generation.
+      </p>
+      <div class="fmp-bar-chart" data-chart="gmm"></div>
+    </div>
+
+    <!-- Path Diversity -->
+    <div class="sec-panel sec-panel-hidden" id="panel-diversity">
+      <p class="sec-panel-desc">
+        For a fixed start-goal-scene query, Flow Motion Policy generates diverse trajectory proposals —
+        not copies of a single dominant path. Diversity is measured as the average pairwise joint-space
+        trajectory distance across sampled candidates. The spread is meaningful and consistent: it
+        persists even within the collision-free subset, indicating the model has learned a genuine
+        distribution over feasible motions rather than collapsing to a single mode.
+      </p>
+
+      <!-- Paper Table IV: fixed-query summary -->
+      <h3 class="subsec-heading" style="margin-top:0;">Fixed-Query Diversity (N = 100)</h3>
+      <div class="tbl-scroll">
+        <table class="bt">
+          <thead>
+            <tr>
+              <th>Samples per query</th>
+              <th>Collision-free</th>
+              <th>Pairwise diversity (all)</th>
+              <th>Pairwise diversity (collision-free)</th>
+              <th>FMP-1 success</th>
+              <th>FMP-100 success</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="ours">
+              <td>300</td>
+              <td><span class="bv">300 / 300</span></td>
+              <td>0.26 rad</td>
+              <td>0.26 rad</td>
+              <td>43.5%</td>
+              <td><span class="bv">62.3%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tbl-cap">
+        All 300 sampled trajectories reach the goal and are collision-free for this query, with
+        consistent pairwise diversity across the full and feasible subsets.
+      </p>
+
+
+      <!-- Qualitative figure, smaller -->
+      <div class="fig-wrap" style="margin-top:1.8rem; text-align:center;">
+        <img src="./static/images/10MultiModal.png"
+             alt="Path diversity: all paths vs collision-free paths"
+             style="max-width:42%; border-radius:8px; box-shadow:0 2px 14px rgba(0,0,0,0.09);">
+        <p class="fig-cap" style="max-width:55%; margin:0.6rem auto 0;">
+          For a fixed query, FMP samples diverse paths (left: all candidates; right: collision-free subset).
+          The spread across the workspace confirms proposal diversity rather than mode collapse.
+        </p>
+      </div>
+    </div>
+
+    <!-- Time-to-Solution -->
+    <div class="sec-panel sec-panel-hidden" id="panel-tts">
+      <p class="sec-panel-desc">
+        Increasing the number of sampled trajectories improves success rate across all policy heads, with
+        diminishing returns at larger <em>N</em>. The MLP head offers the strongest time-to-solution trade-off,
+        reaching 75% success at <em>N</em> = 200 in only 0.48 seconds, while the larger U-Net, Transformer,
+        and DiT heads require more inference time.
+      </p>
+      <div class="fmp-line-chart" id="lc-tts" data-linechart="tts"></div>
+    </div>
+
+    <!-- Policy Head Architecture -->
+    <div class="sec-panel sec-panel-hidden" id="panel-head">
+      <p class="sec-panel-desc">
+        We ablate the policy head design by testing four flow architectures (MLP, U-Net, Transformer,
+        DiT) and comparing each against a diffusion-based counterpart (DMP) with the same encoder
+        backbone. FMP consistently outperforms DMP across architectures and N values, reaching
+        higher success with fewer inference function evaluations. The MLP head delivers the best
+        speed-accuracy trade-off; heavier architectures add marginal accuracy at the cost of higher
+        latency. Use the tabs below to compare N=1 vs N=100, and success rate vs. planning time.
+      </p>
+      <div class="fmp-bar-chart" data-chart="head"></div>
+    </div>
+
+    <!-- NFE -->
+    <div class="sec-panel sec-panel-hidden" id="panel-nfe">
+      <p class="sec-panel-desc">
+        We study how the number of function evaluations (NFE) — denoising steps for DMP, Euler
+        integration steps for FMP — affects the success-time trade-off. FMP is robust to a
+        reduced step count: cutting NFE significantly from the default lowers planning time with
+        minimal impact on success rate. DMP degrades more noticeably under the same reduction,
+        reflecting a fundamental difference in how the two generative formulations distribute
+        their computation across steps.
+      </p>
+      <div class="fmp-bar-chart" data-chart="nfe"></div>
+    </div>
+
+    <!-- Best-of-N Scaling -->
+    <div class="sec-panel sec-panel-hidden" id="panel-bon">
+      <p class="sec-panel-desc">
+        Increasing N monotonically improves success rate for both FMP and DMP across all head
+        architectures. FMP scales more efficiently — reaching comparable or higher success than DMP
+        at the same N, while generating candidates faster. Toggle between FMP and DMP, and between
+        Success Rate and Planning Time, to compare the full picture. Hover over the chart to read
+        exact values at each N.
+      </p>
+      <div class="fmp-line-chart" id="lc-bon" data-linechart="bon"></div>
+    </div>
+
+    <!-- Inference Steps -->
+    <div class="sec-panel sec-panel-hidden" id="panel-steps">
+      <p class="sec-panel-desc">
+        We sweep the number of Euler solver steps (5–90) across all head architectures, with and
+        without best-of-N selection. Success rate barely changes with step count — the flow policy
+        already produces high-quality samples with very few steps. Planning time, however, grows
+        linearly. Toggle between N=1 / N=100 and Success Rate / Planning Time. Hover for exact values.
+      </p>
+      <div class="fmp-line-chart" id="lc-steps" data-linechart="steps"></div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ===================== REAL WORLD ===================== -->
+<section class="section sec-white" id="realworld">
+  <div class="container is-max-desktop">
+    <h2 class="sec-heading">Real-World Deployment</h2>
+
+    <div class="content" style="font-size:0.95rem; line-height:1.72; color:#333;">
+      <p>
+        We deploy Flow Motion Policy on a UR5e robotic manipulator in real-world environments
+        without any additional training or fine-tuning. A calibrated Intel RealSense D435i RGB-D
+        camera captures the workspace point cloud. AprilTag markers estimate the camera-to-robot
+        transform. Three task types are evaluated: Bins, Articulated, and Shelves.
+      </p>
+    </div>
+
+    <!-- Real-world stats -->
+    <div class="realworld-chart-card reveal-block">
+      <div class="fmp-bar-chart realworld-chart" data-chart="realworld"></div>
+      <p class="tbl-cap" style="text-align:center;">
+        <strong>Real-world success rate.</strong> FMP-100 solves all Bins and Articulated tasks and improves total success from 33.4% to 86.7%.
+      </p>
+    </div>
+
+    <div class="fig-wrap fig-half" style="margin-top:2rem;">
+      <img src="./static/images/11RealDemo.png"
+           alt="Real-world deployment: Bins, Articulated, and Shelves tasks">
+      <p class="fig-cap">
+        <strong>Real-World Deployment.</strong>
+        FMP-100 plans collision-free paths across three real-world task categories: 1. Bins,
+        2. Articulated, and 3. Shelves, without any retraining.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="#" title="GitHub (Coming Soon)"><i class="fab fa-github"></i></a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered" style="font-size:0.83rem; color:#888;">
+          <p>
+            This website is built on the
+            <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> template, licensed under
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
